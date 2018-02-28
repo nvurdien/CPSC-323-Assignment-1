@@ -11,7 +11,7 @@ class State(Enum):
     
     
 # still working on the states    
-stateTable[][] = [[]]
+stateTable = [[]]
 
 def checkToken(token):
     if token.isdigit():
@@ -36,20 +36,20 @@ def Lexer(expression):
     for token in expression:
         value_type = checkToken(token)
         if currentState == State.REJECT:
-            if prevState != State.SPACE
+            if prevState != State.SPACE:
                 temp = {'token': currentToken, 'lexemme': prevState}
                 tokens.push(temp)
             currentToken = ""
         else:
             currentToken += token
         prevState = currentState
-    if currentState != State.SPACE && currentToken != "":
+    if currentState != State.SPACE and currentToken != "":
         temp = {'token': currentToken, 'lexemme': prevState}
         tokens.push(temp)
     return tokens
 
 
-filename = raw_input('Enter a filename: ')
+filename = input('Enter a filename: ')
 
 results = []
 with open(filename) as inputfile:
