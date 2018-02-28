@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class State(Enum):
     REJECT = 0,
     INTEGER = 1,
@@ -8,10 +9,11 @@ class State(Enum):
     STRING = 4,
     UNKNOWN = 5,
     SPACE = 6
-    
-    
+
+
 # still working on the states    
 stateTable = [[]]
+
 
 def checkToken(token):
     if token.isdigit():
@@ -27,6 +29,7 @@ def checkToken(token):
     else:
         return State.UNKNOWN
 
+
 def Lexer(expression):
     tokens = []
     col = State.REJECT
@@ -38,14 +41,14 @@ def Lexer(expression):
         if currentState == State.REJECT:
             if prevState != State.SPACE:
                 temp = {'token': currentToken, 'lexemme': prevState}
-                tokens.push(temp)
+                tokens.append(temp)
             currentToken = ""
         else:
             currentToken += token
         prevState = currentState
     if currentState != State.SPACE and currentToken != "":
         temp = {'token': currentToken, 'lexemme': prevState}
-        tokens.push(temp)
+        tokens.append(temp)
     return tokens
 
 
@@ -54,4 +57,4 @@ filename = input('Enter a filename: ')
 results = []
 with open(filename) as inputfile:
     for line in inputfile:
-        results.push(Lexer(line))
+        results.append(Lexer(line))
