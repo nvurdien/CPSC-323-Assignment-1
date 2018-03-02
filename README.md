@@ -1,4 +1,5 @@
-#CPSC323 Assignments
+# CPSC323 Assignments
+Assignments created for Compilers course at California State University, Fullerton
 
 ## CPSC323 Assignment 1
 
