@@ -80,13 +80,13 @@ def Lexer(expression):
     for token in expression:
         col = checkToken(token)
         currentState = stateTable[int(currentState)][int(col)]
-        print("currentToken is ", currentToken, "currentState is ", currentState.fullname)
+        # print("currentToken is ", currentToken, "currentState is ", currentState.fullname)
         if currentState == State.REJECT:
             currentToken = currentToken.replace(" ", "")
             if prevState != State.SPACE and currentToken:
                 if currentToken in keyword:
                     tokens.append({'token': currentToken, 'lexeme': State.KEYWORD})
-                elif currentToken.find('$') > -1 and currentToken[len(currentToken)-1] != '$':
+                elif prevState == State.IDENTIFIER and currentToken.find('$') > -1 and currentToken[len(currentToken)-1] != '$':
                     tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN})
                 else:
                     tokens.append({'token': currentToken, 'lexeme': prevState})
@@ -101,18 +101,27 @@ def Lexer(expression):
     return tokens
 
 
-filename = input('Enter a filename: ')
+filename = input('Enter a input filename: ')
 
 results = []
 with open(filename) as inputfile:
     for line in inputfile:
         results.append(Lexer(line))
-print("Token\t\t=\tLexeme")
-for val in results:
-    for r in val:
-        if r['lexeme'].fullname == 'REAL':
-            print(r['lexeme'].fullname, "\t\t=\t", r['token'])
-        else:
-            print(r['lexeme'].fullname, "\t=\t", r['token'])
+# print("Token\t\t=\tLexeme")
+# for val in results:
+#     for r in val:
+#         if r['lexeme'].fullname == 'REAL':
+#             print(r['lexeme'].fullname, "\t\t=\t", r['token'])
+#         else:
+#             print(r['lexeme'].fullname, "\t=\t", r['token'])
 
 # include output file
+filename = input('Enter a output filename: ')
+with open(filename, "w+") as outputfile:
+    print("Token\t\t=\tLexeme", file=outputfile)
+    for val in results:
+        for r in val:
+            if r['lexeme'].fullname == 'REAL':
+                print(r['lexeme'].fullname, "\t\t=\t", r['token'], file=outputfile)
+            else:
+                print(r['lexeme'].fullname, "\t=\t", r['token'], file=outputfile)
