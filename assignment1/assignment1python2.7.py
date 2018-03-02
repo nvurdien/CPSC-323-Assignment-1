@@ -3,8 +3,9 @@
 from enum import Enum
 import string
 
-keyword = ['while', 'if', 'for', 'else', 'get', 'int', 'endif', 'return', 'put']
-separator = ['(', ')', '[', ']', '{', '}']
+keyword = ['while', 'if', 'for', 'else', 'get', 'int', 'endif', 'return', 'put', 'function', 'real']
+# %% checked later for separators
+separator = ['(', ')', '[', ']', '{', '}', '!', ';', ',', ':']
 
 
 class State(Enum):
@@ -52,6 +53,9 @@ def checkToken(token):
         return State.SPACE
     elif token == '$':
         return State.IDENTIFIER
+    elif token == '.':
+        # print("is real")
+        return State.REAL
     for i in string.punctuation:
         if token == i:
             if token in separator:
@@ -62,16 +66,16 @@ def checkToken(token):
     if token.isalpha():
         # print("is alpha")
         return State.IDENTIFIER
-    elif token == '.':
-        # print("is real")
-        return State.REAL
     else:
         # print("is unknown")
         return State.UNKNOWN
 
 
+comment = False
+
+
 def Lexer(expression):
-    global col
+    global col, comment
     tokens = []
     col = State.REJECT
     currentState = State.REJECT
@@ -84,12 +88,20 @@ def Lexer(expression):
         if currentState == State.REJECT:
             currentToken = currentToken.replace(" ", "")
             if prevState != State.SPACE and currentToken:
-                if currentToken in keyword:
-                    tokens.append({'token': currentToken, 'lexeme': State.KEYWORD})
-                elif prevState == State.IDENTIFIER and currentToken.find('$') > -1 and currentToken[len(currentToken)-1] != '$':
-                    tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN})
-                else:
-                    tokens.append({'token': currentToken, 'lexeme': prevState})
+                if currentToken == '!':
+                    if comment:
+                        comment = False
+                    else:
+                        comment = True
+                elif not comment:
+                    if currentToken in keyword:
+                        tokens.append({'token': currentToken, 'lexeme': State.KEYWORD})
+                    elif prevState == State.IDENTIFIER and currentToken.find('$') > -1 and currentToken[len(currentToken)-1] != '$':
+                        tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN})
+                    elif currentToken == '%%':
+                        tokens.append({'token': currentToken, 'lexeme': State.SEPARATOR})
+                    else:
+                        tokens.append({'token': currentToken, 'lexeme': prevState})
             currentToken = token
             currentState = checkToken(token)
         else:
@@ -107,13 +119,13 @@ results = []
 with open(filename) as inputfile:
     for line in inputfile:
         results.append(Lexer(line))
-print("Token\t\t=\tLexeme")
-for val in results:
-    for r in val:
-        if r['lexeme'].fullname == 'REAL':
-            print("%s \t\t=\t %s") % (r['lexeme'].fullname, r['token'])
-        else:
-            print("%s \t=\t %s") % (r['lexeme'].fullname, r['token'])
+# print("Token\t\t=\tLexeme")
+# for val in results:
+#     for r in val:
+#         if r['lexeme'].fullname == 'REAL':
+#             print("%s \t\t=\t %s") % (r['lexeme'].fullname, r['token'])
+#         else:
+#             print("%s \t=\t %s") % (r['lexeme'].fullname, r['token'])
 
 
 # include output file
