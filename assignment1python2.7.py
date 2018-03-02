@@ -29,32 +29,40 @@ class State(Enum):
 # still working on the states    
 stateTable = [
     [0,                State.INTEGER,    State.REAL,    State.OPERATOR, State.SEPARATOR, State.IDENTIFIER, State.KEYWORD, State.UNKNOWN, State.SPACE],
-    [State.INTEGER,    State.INTEGER,    State.REAL,    State.REJECT,   State.REJECT,    State.REJECT,     State.REJECT,  State.REJECT,  State.REJECT],
+    [State.INTEGER,    State.INTEGER,    State.REAL,    State.REJECT,   State.REJECT,    State.IDENTIFIER, State.REJECT,  State.REJECT,  State.REJECT],
     [State.REAL,       State.REAL,       State.UNKNOWN, State.REJECT,   State.REJECT,    State.REJECT,     State.REJECT,  State.REJECT,  State.REJECT],
-    [State.OPERATOR,   State.REJECT,     State.REJECT,  State.REJECT,   State.REJECT,    State.REJECT,     State.REJECT,  State.REJECT,  State.REJECT],
+    [State.OPERATOR,   State.REJECT,     State.REJECT,  State.OPERATOR, State.REJECT,    State.IDENTIFIER, State.REJECT,  State.REJECT,  State.REJECT],
     [State.SEPARATOR,  State.REJECT,     State.REJECT,  State.REJECT,   State.REJECT,    State.REJECT,     State.REJECT,  State.REJECT,  State.REJECT],
-    [State.IDENTIFIER, State.IDENTIFIER, State.REJECT,  State.REJECT,   State.REJECT,    State.IDENTIFIER, State.REJECT, State.REJECT,  State.REJECT],
-    [State.KEYWORD,    State.REJECT,     State.REJECT,  State.REJECT,   State.REJECT,    State.REJECT,     State.REJECT, State.REJECT,  State.REJECT],
+    [State.IDENTIFIER, State.IDENTIFIER, State.REJECT,  State.REJECT,   State.REJECT,    State.IDENTIFIER, State.REJECT,  State.REJECT,  State.REJECT],
+    [State.KEYWORD,    State.REJECT,     State.REJECT,  State.REJECT,   State.REJECT,    State.REJECT,     State.REJECT,  State.REJECT,  State.REJECT],
     [State.UNKNOWN,    State.UNKNOWN,    State.UNKNOWN, State.UNKNOWN,  State.UNKNOWN,   State.UNKNOWN,    State.UNKNOWN, State.UNKNOWN, State.REJECT],
-    [State.SPACE,      State.REJECT,     State.REJECT,  State.REJECT,   State.REJECT,    State.REJECT,     State.REJECT,  State.REJECT,  State.REJECT],
+    [State.SPACE,      State.INTEGER,    State.REAL,    State.OPERATOR, State.SEPARATOR, State.IDENTIFIER, State.KEYWORD, State.UNKNOWN, State.SPACE],
 ]
 
 
 def checkToken(token):
+    # print("Check Token", token)
     if token.isdigit():
+        # print("is digit")
         return State.INTEGER
     elif token.isspace():
+        # print("is space")
         return State.SPACE
     elif token.isalpha():
+        # print("is alpha")
         return State.IDENTIFIER
     elif token == '.':
+        # print("is real")
         return State.REAL
     for i in string.punctuation:
         if token == i:
             if token in separator:
+                # print("is separator")
                 return State.SEPARATOR
+            # print("is punc")
             return State.OPERATOR
     else:
+        # print("is unknown")
         return State.UNKNOWN
 
 
@@ -68,6 +76,7 @@ def Lexer(expression):
     for token in expression:
         col = checkToken(token)
         currentState = stateTable[int(currentState)][int(col)]
+        # print("currentToken is ", currentToken, "currentState is ", currentState.fullname)
         if currentState == State.REJECT:
             if currentToken in keyword:
                 tokens.append({'token': currentToken, 'lexeme': State.KEYWORD})
@@ -82,7 +91,7 @@ def Lexer(expression):
     return tokens
 
 
-filename = input('Enter a filename: ')
+filename = raw_input('Enter a filename: ')
 
 results = []
 with open(filename) as inputfile:
@@ -91,4 +100,4 @@ with open(filename) as inputfile:
 print("Token\t\t\tLexeme")
 for val in results:
     for r in val:
-        print(r['lexeme'].fullname, "\t\t", r['token'])
+        print("%s \t\t %s") % (r['lexeme'].fullname, r['token'])
