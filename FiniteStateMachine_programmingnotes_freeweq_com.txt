@@ -1,6 +1,6 @@
 
 
-Rat12F     Function   function  Identifier
+Rat18F     Function   function  Identifier
   ( )   : : ; , {} = []
     int     boolean    real
   If    if  else  fi while
