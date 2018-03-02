@@ -1,7 +1,9 @@
+# works with python2.7
+
 from enum import Enum
 import string
 
-keyword = ['while']
+keyword = ['while', 'if', 'for', 'else', 'get', 'int', 'endif', 'return', 'put']
 separator = ['(', ')', '[', ']', '{', '}']
 
 
@@ -78,6 +80,7 @@ def Lexer(expression):
         currentState = stateTable[int(currentState)][int(col)]
         # print("currentToken is ", currentToken, "currentState is ", currentState.fullname)
         if currentState == State.REJECT:
+            currentToken = currentToken.replace(" ", "")
             if currentToken in keyword:
                 tokens.append({'token': currentToken, 'lexeme': State.KEYWORD})
             elif prevState != State.SPACE:
@@ -91,13 +94,20 @@ def Lexer(expression):
     return tokens
 
 
-filename = raw_input('Enter a filename: ')
+filename = raw_input('Enter a input filename: ')
 
 results = []
 with open(filename) as inputfile:
     for line in inputfile:
         results.append(Lexer(line))
-print("Token\t\t\tLexeme")
+print("Token\t\t=\tLexeme")
 for val in results:
     for r in val:
-        print("%s \t\t %s") % (r['lexeme'].fullname, r['token'])
+        if r['lexeme'].fullname == 'REAL':
+            print("%s \t\t=\t %s") % (r['lexeme'].fullname, r['token'])
+        else:
+            print("%s \t=\t %s") % (r['lexeme'].fullname, r['token'])
+
+
+# include output file
+# filename = raw_input('Enter a output filename: ')

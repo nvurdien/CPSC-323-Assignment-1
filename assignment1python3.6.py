@@ -1,7 +1,9 @@
+# works with python3.6
+
 from enum import Enum
 import string
 
-keyword = ['while']
+keyword = ['while', 'if', 'for', 'else', 'get', 'int', 'endif', 'return', 'put']
 separator = ['(', ')', '[', ']', '{', '}']
 
 
@@ -31,12 +33,12 @@ stateTable = [
     [0,                State.INTEGER,    State.REAL,    State.OPERATOR, State.SEPARATOR, State.IDENTIFIER, State.KEYWORD, State.UNKNOWN, State.SPACE],
     [State.INTEGER,    State.INTEGER,    State.REAL,    State.REJECT,   State.REJECT,    State.IDENTIFIER, State.REJECT,  State.REJECT,  State.REJECT],
     [State.REAL,       State.REAL,       State.UNKNOWN, State.REJECT,   State.REJECT,    State.REJECT,     State.REJECT,  State.REJECT,  State.REJECT],
-    [State.OPERATOR,   State.REJECT,     State.REJECT,  State.OPERATOR, State.REJECT,    State.IDENTIFIER, State.REJECT,  State.REJECT,  State.REJECT],
+    [State.OPERATOR,   State.REJECT,     State.REJECT,  State.OPERATOR, State.REJECT,    State.REJECT,     State.REJECT,  State.REJECT,  State.REJECT],
     [State.SEPARATOR,  State.REJECT,     State.REJECT,  State.REJECT,   State.REJECT,    State.REJECT,     State.REJECT,  State.REJECT,  State.REJECT],
     [State.IDENTIFIER, State.IDENTIFIER, State.REJECT,  State.REJECT,   State.REJECT,    State.IDENTIFIER, State.REJECT,  State.REJECT,  State.REJECT],
     [State.KEYWORD,    State.REJECT,     State.REJECT,  State.REJECT,   State.REJECT,    State.REJECT,     State.REJECT,  State.REJECT,  State.REJECT],
     [State.UNKNOWN,    State.UNKNOWN,    State.UNKNOWN, State.UNKNOWN,  State.UNKNOWN,   State.UNKNOWN,    State.UNKNOWN, State.UNKNOWN, State.REJECT],
-    [State.SPACE,      State.INTEGER,    State.REAL,    State.OPERATOR, State.SEPARATOR, State.IDENTIFIER, State.KEYWORD, State.UNKNOWN, State.SPACE],
+    [State.SPACE,      State.REJECT,     State.REJECT,  State.REJECT,   State.REJECT,    State.REJECT,     State.REJECT,  State.REJECT,  State.REJECT],
 ]
 
 
@@ -48,12 +50,8 @@ def checkToken(token):
     elif token.isspace():
         # print("is space")
         return State.SPACE
-    elif token.isalpha():
-        # print("is alpha")
+    elif token == '$':
         return State.IDENTIFIER
-    elif token == '.':
-        # print("is real")
-        return State.REAL
     for i in string.punctuation:
         if token == i:
             if token in separator:
@@ -61,6 +59,12 @@ def checkToken(token):
                 return State.SEPARATOR
             # print("is punc")
             return State.OPERATOR
+    if token.isalpha():
+        # print("is alpha")
+        return State.IDENTIFIER
+    elif token == '.':
+        # print("is real")
+        return State.REAL
     else:
         # print("is unknown")
         return State.UNKNOWN
@@ -76,17 +80,23 @@ def Lexer(expression):
     for token in expression:
         col = checkToken(token)
         currentState = stateTable[int(currentState)][int(col)]
-        # print("currentToken is ", currentToken, "currentState is ", currentState.fullname)
+        print("currentToken is ", currentToken, "currentState is ", currentState.fullname)
         if currentState == State.REJECT:
-            if currentToken in keyword:
-                tokens.append({'token': currentToken, 'lexeme': State.KEYWORD})
-            elif prevState != State.SPACE:
-                tokens.append({'token': currentToken, 'lexeme': prevState})
-            currentToken = ""
+            currentToken = currentToken.replace(" ", "")
+            if prevState != State.SPACE and currentToken:
+                if currentToken in keyword:
+                    tokens.append({'token': currentToken, 'lexeme': State.KEYWORD})
+                elif currentToken.find('$') > -1 and currentToken[len(currentToken)-1] != '$':
+                    tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN})
+                else:
+                    tokens.append({'token': currentToken, 'lexeme': prevState})
+            currentToken = token
+            currentState = checkToken(token)
         else:
+            currentToken = currentToken.replace(" ", "")
             currentToken += token
         prevState = currentState
-    if currentState != State.SPACE and currentToken != "":
+    if currentState != State.SPACE and currentToken and currentState != State.REJECT:
         tokens.append({'token': currentToken, 'lexeme': prevState})
     return tokens
 
@@ -97,7 +107,12 @@ results = []
 with open(filename) as inputfile:
     for line in inputfile:
         results.append(Lexer(line))
-print("Token\t\t\tLexeme")
+print("Token\t\t=\tLexeme")
 for val in results:
     for r in val:
-        print(r['lexeme'].fullname, "\t\t", r['token'])
+        if r['lexeme'].fullname == 'REAL':
+            print(r['lexeme'].fullname, "\t\t=\t", r['token'])
+        else:
+            print(r['lexeme'].fullname, "\t=\t", r['token'])
+
+# include output file
