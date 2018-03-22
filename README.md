@@ -3,7 +3,7 @@ Assignments created for Compilers course at California State University, Fullert
 
 ## CPSC323 Assignment 1
 
-Rat18F compiler written in Python
+Rat18F lexical analyzer written in Python
 Depending on your version of Python please follow the following directions:
 
 #### Python2.7
@@ -11,3 +11,11 @@ Depending on your version of Python please follow the following directions:
 
 #### Python3.6
 `python assignment1python3.6.py`
+
+
+## CPSC323 Assignment 2
+
+Rat18F syntax analyzer written in Python
+
+#### Run
+python assignment2python3.6.py

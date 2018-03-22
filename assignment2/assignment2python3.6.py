@@ -3,7 +3,7 @@
 from enum import Enum
 import string
 
-keyword = ['while', 'if', 'for', 'else', 'get', 'int', 'endif', 'return', 'put', 'function', 'real']
+keyword = ['while', 'if', 'for', 'else', 'get', 'int', 'endif', 'return', 'put', 'function', 'real', 'boolean']
 # %% checked later for separators
 separator = ['(', ')', '[', ']', '{', '}', '!', ';', ',', ':']
 
@@ -18,9 +18,7 @@ class State(Enum):
     KEYWORD = 6, 'KEYWORD'
     UNKNOWN = 7, 'UNKNOWN'
     SPACE = 8, 'SPACE'
-    EXPRESSION = 9, 'EXPRESSION'
-    T_EXPRESSION = 10, 'T_EXPRESSION'
-    E_NEXT = 11, 'E_NEXT'
+    BOOLEAN = 9, 'BOOLEAN'
 
     def __new__(cls, value, name):
         member = object.__new__(cls)
@@ -35,7 +33,7 @@ class State(Enum):
 # still working on the states    
 stateTable = [
     [0, State.INTEGER, State.REAL, State.OPERATOR, State.SEPARATOR, State.IDENTIFIER, State.KEYWORD, State.UNKNOWN,
-     State.SPACE],
+     State.SPACE, State.BOOLEAN],
     [State.INTEGER, State.INTEGER, State.REAL, State.REJECT, State.REJECT, State.IDENTIFIER, State.REJECT, State.REJECT,
      State.REJECT],
     [State.REAL, State.REAL, State.UNKNOWN, State.REJECT, State.REJECT, State.REJECT, State.REJECT, State.REJECT,
@@ -116,6 +114,8 @@ def Lexer(expression):
                     elif prevState == State.REAL and (
                             currentToken.index(".") == 0 or currentToken.index(".") == len(currentToken) - 1):
                         tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN})
+                    elif currentToken is 'true' or currentToken is 'false':
+                        tokens.append({'token': currentToken, 'lexeme': State.BOOLEAN})
                     else:
                         tokens.append({'token': currentToken, 'lexeme': prevState})
             currentToken = token
@@ -135,39 +135,73 @@ def syntaxAnalyzer(fn):
     error = False
     assignment = False
     operation = False
+    function_header = False
+    var_list = False
+    line_num = 0
     with open(fn) as inputfile:
         for line in inputfile:
             temp = Lexer(line)
             index = 0
+            line_num += 1
             while index < len(temp):
                 print('T')
                 if temp[index]['lexeme'] is State.IDENTIFIER:
                     status.append(temp[index])
+                    result += "Token: Identifier\tLexeme: " + temp[index]['token'] + "\n"
                     if not operation and not assignment:
                         print(1)
-                        result += "Token: Identifier\tLexeme: " + temp[index]['token'] + "\n"
                         result += "<Statement> -> <Assign>\n"
                         result += "<Assign> -> <Identifier> = <Expression>;\n"
                     elif assignment and not operation:
                         print(2)
-                        result += "Token: Identifier\tLexeme: " + temp[index]['token'] + "\n"
                         result += "<Expression> -> <Term><Expression Prime>\n"
                         result += "<Term> -> <Factor><Term Prime>\n"
                         result += "<Factor> -> <Identifier>\n"
                     else:
                         print("next")
-                        result += "Token: Identifier\tLexeme: " + temp[index]['token'] + "\n"
                         result += "<Term> -> <Factor><Term Prime>\n"
                         result += "<Factor> -> <Identifier>\n"
+                elif temp[index]['lexeme'] is State.KEYWORD and not assignment and not operation:
+                    var_list = True
+                    result += "<Statement> -> <Declaration List>"
+                    result += "<Declaration List> -> <Declaration>\n"
+                elif temp[index]['lexeme'] is State.INTEGER:
+                    if assignment and operation:
+                        result += "<Term> -> <Factor><Term Prime>\n"
+                        result += "<Factor> -> <Integer>\n"
+                    elif assignment:
+                        result += "<Expression> -> <Term><Expression Prime>\n"
+                        result += "<Term> -> <Factor><Term Prime>\n"
+                        result += "<Factor> -> <Integer>\n"
+                elif temp[index]['lexeme'] is State.REAL:
+                    if assignment and operation:
+                        if assignment and operation:
+                            result += "<Term> -> <Factor><Term Prime>\n"
+                            result += "<Factor> -> <Real>\n"
+                        elif assignment:
+                            result += "<Expression> -> <Term><Expression Prime>\n"
+                            result += "<Term> -> <Factor><Term Prime>\n"
+                            result += "<Factor> -> <Real>\n"
+                elif temp[index]['lexeme'] is State.BOOLEAN:
+                    if assignment and operation:
+                        if assignment and operation:
+                            result += "<Term> -> <Factor><Term Prime>\n"
+                            result += "<Factor> -> <Boolean>\n"
+                        elif assignment:
+                            result += "<Expression> -> <Term><Expression Prime>\n"
+                            result += "<Term> -> <Factor><Term Prime>\n"
+                            result += "<Factor> -> <Boolean>\n"
                 else:
                     print(3)
-                    result += "ID expected"
+                    result += "Line " + line_num + ": " + "ID expected"
                     error = True
                 if error:
                     return result
                 index += 1
                 print("E_next")
-                if temp[index]['token'] is '=':
+                if var_list:
+                    result += "<Declaration> -> <Qualifier><Identifiers>\n"
+                elif temp[index]['token'] is '=':
                     if operation:
                         print(4)
                         result += "you cannot assign an operation"
@@ -175,7 +209,8 @@ def syntaxAnalyzer(fn):
                     print(5)
                     assignment = True
                     result += "Token: Operator\tLexeme: " + temp[index]['token'] + "\n"
-                elif temp[index]['token'] is '+' or temp[index]['token'] is '-' or temp[index]['token'] is '*' or temp[index]['token'] is '/':
+                elif temp[index]['token'] is '+' or temp[index]['token'] is '-' or temp[index]['token'] is '*' or \
+                        temp[index]['token'] is '/':
                     print(6)
                     operation = True
                     result += "Token: Operator\tLexeme: " + temp[index]['token'] + "\n"
@@ -185,12 +220,13 @@ def syntaxAnalyzer(fn):
                     print(7)
                     operation = False
                     assignment = False
+                    var_list = False
                     result += "Token: Operator\tLexeme: " + temp[index]['token'] + "\n"
                     result += "<Term Prime> -> epsilon\n"
                     result += "<Expression Prime> -> epsilon\n"
                 else:
                     error = True
-                    result += "There is an error"
+                    result += "Line " + line_num + ": " + " unexpected token"
                 if error:
                     return result
                 index += 1

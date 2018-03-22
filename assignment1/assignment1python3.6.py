@@ -100,6 +100,8 @@ def Lexer(expression):
                         tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN})
                     elif currentToken == '%%':
                         tokens.append({'token': currentToken, 'lexeme': State.SEPARATOR})
+                    elif prevState == State.REAL and (currentToken.index(".") == 0 or currentToken.index(".") == len(currentToken)-1):
+                        tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN})
                     else:
                         tokens.append({'token': currentToken, 'lexeme': prevState})
             currentToken = token
