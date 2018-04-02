@@ -1,0 +1,1 @@
+<Declaration List> -> <Declaration>;
