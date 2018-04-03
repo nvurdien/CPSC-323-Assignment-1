@@ -1,10 +1,11 @@
 ! Find largest value between two numbers!
-int num1, num2, large$
-if(num1 > num2)
+int num, nu2m, large$;
+if(num > nu2m)
 {
-	large = num1$;
+	large = num;
 }
 else
 {
-	large = num2$;
+	large = nu2m;
 }
+endif

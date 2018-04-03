@@ -113,7 +113,7 @@ def Lexer(expression, line_num):
                     elif prevState == State.REAL and (
                             currentToken.index(".") == 0 or currentToken.index(".") == len(currentToken) - 1):
                         tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN, 'line_num': line_num})
-                    elif currentToken is 'true' or currentToken is 'false':
+                    elif currentToken == 'true' or currentToken == 'false':
                         tokens.append({'token': currentToken, 'lexeme': State.BOOLEAN, 'line_num': line_num})
                     else:
                         tokens.append({'token': currentToken, 'lexeme': prevState, 'line_num': line_num})
@@ -133,28 +133,37 @@ def printToken(fn, index, output):
 
 
 def body_state(fn, index, output):
-    printToken(fn, index-1, output)
     print("<Body> -> { <Statement List> }", file=output)
     return statement_list(fn, index-1, output)
 
 
 def expression_tail(fn, index, output):
+    print("expression_tail")
     if fn[index]['token'] in ['+', '-']:
-        return expression(fn, index + 1, output)
+        printToken(fn, index, output)
+        return express(fn, index + 1, output)
     else:
         return index
 
 
 def factor(fn, index, output):
+    print(fn[index]['token'])
+    print("factor")
     if fn[index]['lexeme'] in [State.BOOLEAN, State.INTEGER, State.REAL, State.IDENTIFIER]:
+        printToken(fn, index, output)
+        if len(fn) > index and fn[index+1]['token'] == '(':
+            return factor(fn, index+1, output)
         return index + 1
     elif fn[index]['token'] in ['+', '-'] and len(fn) > index + 1:
+        printToken(fn, index, output)
         return factor(fn, index + 1, output)
-    elif fn[index]['token'] is '(':
+    elif fn[index]['token'] == '(':
+        printToken(fn, index, output)
         index += 1
-        while len(fn) > index and fn[index]['token'] is not ')':
-            index = expression(fn, index, output)
-        if len(fn) > index and fn[index]['token'] is ')':
+        while len(fn) > index and fn[index]['token'] != ')':
+            index = express(fn, index, output)
+        if len(fn) > index and fn[index]['token'] == ')':
+            printToken(fn, index, output)
             return index + 1
         else:
             return None
@@ -162,47 +171,61 @@ def factor(fn, index, output):
 
 
 def term_tail(fn, index, output):
+    print("term_tail")
     if fn[index]['token'] in ['*', '/']:
+        printToken(fn, index, output)
         return term(fn, index + 1, output)
     else:
         return index
 
 
 def term(fn, index, output):
+    print("term")
     index = factor(fn, index, output)
     if None:
         return index
     return term_tail(fn, index, output)
 
 
-def expression(fn, index, output):
+def express(fn, index, output):
+    print("expression")
     index = term(fn, index, output)
+    print(fn[index]['token'])
     return expression_tail(fn, index, output)
 
 
 def condition(fn, index, output):
-    index = expression(fn,index, output)
+    index = express(fn, index, output)
     if fn[index]['token'] in ['==', '^=', '>', '<', '=>', '=<']:
-        return expression(fn, index+1, output)
+        printToken(fn, index, output)
+        return express(fn, index + 1, output)
     else:
         return None
 
 
 def statement(fn, index, output):
-    if fn[index]['lexeme'] is State.IDENTIFIER and len(fn) > index + 1 and fn[index+1]['token'] is '=':
+    if fn[index]['lexeme'] == State.IDENTIFIER and len(fn) > index + 1 and fn[index+1]['token'] == '=':
+        printToken(fn, index, output)
         print("<Assign> ->  <Identifier> = <Expression>", file=output)
-        expression(fn, index+2, output)
-    elif fn[index]['token'] is 'if' and len(fn) > index + 1 and fn[index+1]['token'] is '(':
+        printToken(fn, index+1, output)
+        index = express(fn, index + 2, output)
+    elif fn[index]['token'] == 'if':
+        printToken(fn, index, output)
+        printToken(fn, index+1, output)
         index = condition(fn, index+2, output)
-        if fn[index]['token'] is ')':
+        if fn[index]['token'] == ')':
+            printToken(fn, index, output)
             index = statement_list(fn, index+1, output)
-            if fn[index]['token'] is 'endif':
+            if fn[index]['token'] == 'endif':
                 print("<If> -> if (<Condition>) <Statement> endif", file=output)
+                printToken(fn, index, output)
                 return index
-            elif fn[index]['token'] is 'else':
+            elif fn[index]['token'] == 'else':
                 print("<If> -> if (<Condition>) <Statement> else <Statement> endif", file=output)
+                printToken(fn, index, output)
                 index = statement_list(fn, index + 1, output)
-                if fn[index]['token'] is 'endif':
+                if fn[index]['token'] == 'endif':
+                    printToken(fn, index, output)
                     return index
                 else:
                     return None
@@ -210,24 +233,34 @@ def statement(fn, index, output):
                 return None
         else:
             return None
-    elif fn[index]['token'] is 'return':
+    elif fn[index]['token'] == 'return':
+        printToken(fn, index, output)
         print("<Return> -> return <Expression>;", file=output)
-        expression(fn, index+1, output)
-    elif fn[index]['token'] is 'put' and len(fn) > index + 1 and fn[index+1]['token'] is '(':
+        index = express(fn, index + 1, output)
+    elif fn[index]['token'] == 'put' and len(fn) > index + 1 and fn[index+1]['token'] == '(':
+        printToken(fn, index, output)
         print("<Print> -> put (<Expression>)", file=output)
-        index = expression(fn, index + 2, output)
-        if fn[index]['token'] is not ')':
-            return None
         index += 1
-    elif fn[index]['token'] is 'get' and len(fn) > index + 1 and fn[index+1]['token'] is '(':
+        printToken(fn, index, output)
+        index = express(fn, index + 1, output)
+        printToken(fn, index, output)
+        index += 1
+    elif fn[index]['token'] == 'get' and len(fn) > index + 1 and fn[index+1]['token'] == '(':
+        printToken(fn, index, output)
+        print("<Scan> -> get (<Identifiers>)", file=output)
+        index += 1
+        printToken(fn, index, output)
+        index += 1
         while True:
-            print("<Scan> -> get (<Identifiers>)", file=output)
-            if len(fn) > index + 1 and fn[index]['lexeme'] is State.IDENTIFIER:
+            if len(fn) > index and fn[index]['lexeme'] == State.IDENTIFIER:
+                printToken(fn, index, output)
                 index += 1
-                if fn[index]['token'] is ')':
+                if fn[index]['token'] == ')':
+                    printToken(fn, index, output)
                     print("<Identifiers> -> <Identifier>", file=output)
                     break
-                elif fn[index]['token'] is ',':
+                elif fn[index]['token'] == ',':
+                    printToken(fn, index, output)
                     print("<Identifiers> -> <Identifier>, <Identifiers>", file=output)
                     index += 1
                 else:
@@ -235,26 +268,40 @@ def statement(fn, index, output):
             else:
                 return None
         index += 1
-    elif fn[index]['token'] is 'while' and len(fn) > index + 1 and fn[index + 1]['token'] is '(':
+    elif fn[index]['token'] == 'while' and len(fn) > index + 1 and fn[index + 1]['token'] == '(':
+        printToken(fn, index, output)
         print("<While> -> while(<Condition>) <Statement>", file=output)
+        printToken(fn, index+1, output)
         index = condition(fn, index + 2, output)
-        if fn[index]['token'] is ')':
+        if fn[index]['token'] == ')':
+            printToken(fn, index, output)
             index = statement_list(fn, index + 1, output)
-    if fn[index]['token'] is ';':
+            if index >= len(fn):
+                return index + 1
+            elif fn[index]['token'] == '}':
+                printToken(fn, index, output)
+                return index + 1
+    if fn[index]['token'] == ';':
+        printToken(fn, index, output)
         return index + 1
     else:
         return None
 
 
 def statement_list(fn, index, output):
-    if fn[index]['token'] is '{':
+    if fn[index]['token'] == '{':
+        printToken(fn, index, output)
         print("<Statement> -> { <Statement_List> }", file=output)
         index += 1
         while True:
-            if len(fn) > index and fn[index]['token'] is not '}':
+            print(fn[index]['token'])
+            if len(fn) > index and fn[index]['token'] != '}':
                 index = statement(fn, index, output)
-            elif len(fn) > index:
+            elif len(fn) < index:
                 return None
+            else:
+                printToken(fn, index, output)
+                return index + 1
     else:
         print("<Statement_List> -> ", file=output)
         return statement(fn, index, output)
@@ -262,15 +309,20 @@ def statement_list(fn, index, output):
 
 def dec_list(fn, index, output):
     if fn[index]['token'] in ['int', 'real', 'boolean']:
+        printToken(fn, index, output)
         print("<Declaration List> -> <Declaration>;", file=output)
+        print("<Declaration> -> <Identifiers>", file=output)
         index += 1
         while True:
-            if len(fn) > index + 1 and fn[index]['lexeme'] is State.IDENTIFIER:
+            if len(fn) > index + 1 and fn[index]['lexeme'] == State.IDENTIFIER:
+                printToken(fn, index, output)
                 index += 1
-                if fn[index]['token'] is ';':
+                if fn[index]['token'] in [';']:
                     print("<Identifiers> -> <Identifier>", file=output)
+                    printToken(fn, index, output)
                     return index
-                elif fn[index]['token'] is ',':
+                elif fn[index]['token'] == ',':
+                    printToken(fn, index, output)
                     print("<Identifiers> -> <Identifier>, <Identifiers>", file=output)
                     index += 1
                 else:
@@ -282,10 +334,14 @@ def dec_list(fn, index, output):
 
 
 def parm_list(fn, index, output):
-    if fn[index]['lexeme'] is State.IDENTIFIER:
-        if len(fn) > index + 1 and fn[index + 1]['token'] is ':':
+    if fn[index]['lexeme'] == State.IDENTIFIER:
+        printToken(fn, index, output)
+        if len(fn) > index + 1 and fn[index + 1]['token'] == ':':
+            printToken(fn, index+1, output)
             if len(fn) > index + 2 and fn[index+2]['token'] in ['int', 'boolean', 'real']:
-                if len(fn) > index + 3 and fn[index + 3]['token'] is ',':
+                printToken(fn, index+2, output)
+                if len(fn) > index + 3 and fn[index + 3]['token'] == ',':
+                    printToken(fn, index+3, output)
                     print("<Parameter> -> <Identifier>:<Qualifier>, ", file=output)
                     return parm_list(fn, index + 4, output)
                 else:
@@ -299,21 +355,26 @@ def parm_list(fn, index, output):
 
 
 def func_def(fn, index, output):
-    if fn[index]['lexeme'] is State.IDENTIFIER:
-        if len(fn) > index+1 and fn[index+1]['token'] is '[':
-            if len(fn) > index+2 and fn[index+1]['token'] is not ']':
+    if fn[index]['lexeme'] == State.IDENTIFIER:
+        if len(fn) > index+1 and fn[index+1]['token'] == '[':
+            printToken(fn, index+1, output)
+            if len(fn) > index+2 and fn[index+1]['token'] != ']':
+                printToken(fn, index+2, output)
                 print("<Opt Parameter List> -> <Parameter List>", file=output)
                 index = parm_list(fn, index+2, output)
-            if fn[index]['token'] is not ']':
+            if fn[index]['token'] != ']':
                 return None
             print("<Opt Parameter List> -> epsilon", file=output)
-        if fn[index]['token'] is not '{':
+        index += 1
+        if len(fn) > index and fn[index]['token'] != '{':
+            printToken(fn, index, output)
             print("<Opt Declaration List> -> <Declaration List>", file=output)
             index = dec_list(fn, index+1, output)
         else:
             print("<Opt Declaration List> -> epsilon,", file=output)
-        print("<Body> -> {<Statement List>}", file=output)
+        print(fn[index]['token'])
         index = body_state(fn, index+1, output)
+        print(fn[index]['token'])
         return index
     else:
         return None
@@ -321,25 +382,32 @@ def func_def(fn, index, output):
 
 # have it search for %%
 def start(fn, index, output):
-    if fn[index]['token'] is 'function':
+    if fn[index]['token'] == 'function':
+        printToken(fn, index, output)
         print("<Function Definition> -> <Function>", file=output)
         print("<Function> -> function <Identifier> [Opt Parameter List] <Opt Declaration List> <Body>", file=output)
         index = func_def(fn, index+1, output)
-        if fn[index]['token'] is '%%':
-            index = dec_list(fn, index+1, output)
+        if fn[index]['token'] == '%%':
+            printToken(fn, index, output)
+            if fn[index+1]['token'] in ['int', 'real', 'boolean']:
+                index = dec_list(fn, index+1, output)
         index = statement_list(fn, index+1, output)
+        index -= 1
     elif fn[index]['token'] in ['int', 'real', 'boolean']:
         index = dec_list(fn, index, output)
-    elif fn[index]['token'] is '{':
+    elif fn[index]['token'] == '{':
+        printToken(fn, index, output)
         index = body_state(fn, index+1, output)
     elif fn[index]['token'] in ['if', 'return', 'print', 'scan', 'while']:
-        index = statement_list(fn, index+1, output)
-    elif fn[index]['lexeme'] is State.IDENTIFIER:
-        if len(fn) > index+1 and fn[index+1]['token'] is '=':
+        index = statement(fn, index, output)
+    elif fn[index]['lexeme'] == State.IDENTIFIER:
+        printToken(fn, index, output)
+        if len(fn) > index+1 and fn[index+1]['token'] == '=':
             print("<Assign> ->  <Identifier> = <Expression>", file=output)
-            index = expression(fn, index + 2, output)
+            printToken(fn, index+1, output)
+            index = express(fn, index + 2, output)
         else:
-            index = expression(fn, index+1, output)
+            index = express(fn, index + 1, output)
     return index + 1
 
 
@@ -348,9 +416,7 @@ def syntaxAnalyzer(fn, output):
     new_arr = []
     result = []
     while index < len(fn):
-        print(fn[index]['token'])
         index = start(fn, index, output)
-        print(fn[index]['token'])
 
 
 filename = input('Enter a input filename: ')
