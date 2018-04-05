@@ -139,12 +139,12 @@ def body_state(fn, index, output):
     if index is None:
         print("Unexpected expression at line", past_line, file=output)
         return None
-    if fn[index]['token'] == '{':
+    if index is not None and len(fn) > index and fn[index]['token'] == '{':
         printToken(fn, index, output)
         print("<Body> -> { <Statement_List> }", file=output)
         index += 1
         while True:
-            if len(fn) > index and fn[index]['token'] != '}':
+            if index is not None and len(fn) > index and fn[index]['token'] != '}':
                 index = statement(fn, index, output)
             elif len(fn) < index:
                 past_line = fn[index]['line_num']
@@ -154,11 +154,14 @@ def body_state(fn, index, output):
                 printToken(fn, index, output)
                 return index + 1
     else:
-        print("<Statement_List> -> ", file=output)
-        return statement(fn, index, output)
+        past_line = fn[index]['line_num']
+        print("Expected opening brace token at line", past_line, file=output)
+        return None
 
 
 def expression_tail(fn, index, output):
+    if index is None or len(fn) <= index:
+        return None
     if fn[index]['token'] in ['+', '-']:
         printToken(fn, index, output)
         if fn[index]['token'] in ['+']:
@@ -172,14 +175,17 @@ def expression_tail(fn, index, output):
 
 
 def factor(fn, index, output):
-    if fn[index]['lexeme'] in [State.BOOLEAN, State.INTEGER, State.REAL, State.IDENTIFIER]:
+    global past_line
+    if index is None or len(fn) <= index:
+        return None
+    if index is not None and len(fn) > index and fn[index]['lexeme'] in [State.BOOLEAN, State.INTEGER, State.REAL, State.IDENTIFIER]:
         print("<Factor> -> <Identifier>", end="", file=output)
-        if len(fn) > index and fn[index+1]['token'] == '(':
+        if index is not None and len(fn) > index+1 and fn[index+1]['token'] == '(':
             print("( <Identifiers> )", file=output)
             return factor(fn, index+1, output)
         print("", file=output)
         return index + 1
-    elif fn[index]['token'] in ['+', '-'] and len(fn) > index + 1:
+    elif index is not None and len(fn) > index and fn[index]['token'] in ['+', '-'] and len(fn) > index + 1:
         printToken(fn, index, output)
         if fn[index]['token'] in ['-']:
             print("<Factor> -> - <Factor>", file=output)
@@ -187,22 +193,26 @@ def factor(fn, index, output):
             print("<Factor> -> + <Factor>", file=output)
         printToken(fn, index+1, output)
         return factor(fn, index + 1, output)
-    elif fn[index]['token'] == '(':
+    elif index is not None and len(fn) > index and fn[index]['token'] == '(':
         index += 1
         printToken(fn, index, output)
         print("<Factor> -> ( <Expression> )", file=output)
-        while len(fn) > index and fn[index]['token'] != ')':
+        while index is not None and len(fn) > index and fn[index]['token'] != ')':
             index = express(fn, index, output)
-        if len(fn) > index and fn[index]['token'] == ')':
+        if index is not None and len(fn) > index and fn[index]['token'] == ')':
             printToken(fn, index, output)
             return index + 1
         else:
+            past_line = fn[index]['line_num']
+            print("Expecting closing parentheses at line", past_line, file=output)
             return None
     return index
 
 
 def term_tail(fn, index, output):
-    if fn[index]['token'] in ['*', '/']:
+    if index is None or len(fn) <= index:
+        return None
+    if index is not None and len(fn) > index and fn[index]['token'] in ['*', '/']:
         if fn[index]['token'] in ['*']:
             print("<Term Prime> -> * <Term>", file=output)
         else:
@@ -214,11 +224,13 @@ def term_tail(fn, index, output):
 
 
 def term(fn, index, output):
+    if index is None or len(fn) <= index:
+        return None
     printToken(fn, index, output)
     print("<Term> -> <Factor><Term Prime>", file=output)
     index = factor(fn, index, output)
-    if None:
-        return index
+    if index is None or len(fn) <= index:
+        return None
     return term_tail(fn, index, output)
 
 
@@ -227,8 +239,12 @@ def express(fn, index, output):
     if index is None:
         print("Unexpected expression at line", past_line, file=output)
         return None
+    if index is None or len(fn) <= index:
+        return None
     print("<Expression> -> <Term><Expression Prime>;", file=output)
     index = term(fn, index, output)
+    if index is None or len(fn) <= index:
+        return None
     return expression_tail(fn, index, output)
 
 
@@ -255,7 +271,7 @@ def statement(fn, index, output):
     if index is None:
         print("Unexpected expression at line", past_line, file=output)
         return None
-    if fn[index]['lexeme'] == State.IDENTIFIER and len(fn) > index + 1 and fn[index+1]['token'] == '=':
+    if fn[index]['lexeme'] == State.IDENTIFIER and index is not None and len(fn) > index + 1 and fn[index+1]['token'] == '=':
         printToken(fn, index, output)
         print("<Assign> ->  <Identifier> = <Expression>;", file=output)
         printToken(fn, index+1, output)
@@ -265,37 +281,40 @@ def statement(fn, index, output):
         print("<If> -> if (<Condition>) <Statement> endif", file=output)
         printToken(fn, index+1, output)
         index = condition(fn, index+2, output)
-        if len(fn) > index and fn[index]['token'] == ')':
+        if index is not None and len(fn) > index and fn[index]['token'] == ')':
             printToken(fn, index, output)
             index = statement_list(fn, index+1, output)
-            if len(fn) > index and fn[index]['token'] == 'endif':
+            if index is not None and len(fn) > index and fn[index]['token'] == 'endif':
                 print("<If> -> if (<Condition>) <Statement> endif", file=output)
                 printToken(fn, index, output)
                 return index + 1
-            elif len(fn) > index and fn[index]['token'] == 'else':
+            elif index is not None and len(fn) > index and fn[index]['token'] == 'else':
                 print("<If> -> if (<Condition>) <Statement> else <Statement> endif", file=output)
                 printToken(fn, index, output)
                 index = statement_list(fn, index + 1, output)
-                if len(fn) > index and fn[index]['token'] == 'endif':
+                if index is not None and len(fn) > index and fn[index]['token'] == 'endif':
                     printToken(fn, index, output)
                     return index + 1
                 else:
-                    past_line = fn[index]['line_num']
-                    print("Expecting endif at line", past_line, file=output)
+                    if index is not None:
+                        past_line = fn[index]['line_num']
+                        print("Expecting endif at line", past_line, file=output)
                     return None
             else:
-                past_line = fn[index]['line_num']
-                print("Expecting endif at line", past_line, file=output)
+                if index is not None:
+                    past_line = fn[index]['line_num']
+                    print("Expecting endif at line", past_line, file=output)
                 return None
         else:
-            past_line = fn[index]['line_num']
-            print("Expecting ) at line", past_line, file=output)
+            if index is not None:
+                past_line = fn[index]['line_num']
+                print("Expecting ) at line", past_line, file=output)
             return None
     elif fn[index]['token'] == 'return':
         printToken(fn, index, output)
         print("<Return> -> return <Expression>;", file=output)
         index = express(fn, index + 1, output)
-    elif fn[index]['token'] == 'put' and len(fn) > index + 1 and fn[index+1]['token'] == '(':
+    elif fn[index]['token'] == 'put' and index is not None and len(fn) > index + 1 and fn[index+1]['token'] == '(':
         printToken(fn, index, output)
         print("<Print> -> put (<Expression>);", file=output)
         index += 1
@@ -303,14 +322,14 @@ def statement(fn, index, output):
         index = express(fn, index + 1, output)
         printToken(fn, index, output)
         index += 1
-    elif fn[index]['token'] == 'get' and len(fn) > index + 1 and fn[index+1]['token'] == '(':
+    elif fn[index]['token'] == 'get' and index is not None and len(fn) > index + 1 and fn[index+1]['token'] == '(':
         printToken(fn, index, output)
         print("<Scan> -> get (<Identifiers>);", file=output)
         index += 1
         printToken(fn, index, output)
         index += 1
         while True:
-            if len(fn) > index and fn[index]['lexeme'] == State.IDENTIFIER:
+            if index is not None and len(fn) > index and fn[index]['lexeme'] == State.IDENTIFIER:
                 printToken(fn, index, output)
                 index += 1
                 if fn[index]['token'] == ')':
@@ -322,15 +341,17 @@ def statement(fn, index, output):
                     print("<Identifiers> -> <Identifier>, <Identifiers>", file=output)
                     index += 1
                 else:
-                    past_line = fn[index]['line_num']
-                    print("Expecting comma or parentheses at line", past_line, file=output)
+                    if index is not None:
+                        past_line = fn[index]['line_num']
+                        print("Expecting comma or parentheses at line", past_line, file=output)
                     return None
             else:
-                past_line = fn[index]['line_num']
-                print("Expecting identifier at line", past_line, file=output)
+                if index is not None:
+                    past_line = fn[index]['line_num']
+                    print("Expecting identifier at line", past_line, file=output)
                 return None
         index += 1
-    elif fn[index]['token'] == 'while' and len(fn) > index + 1 and fn[index + 1]['token'] == '(':
+    elif fn[index]['token'] == 'while' and index is not None and len(fn) > index + 1 and fn[index + 1]['token'] == '(':
         printToken(fn, index, output)
         print("<While> -> while(<Condition>) <Statement>", file=output)
         printToken(fn, index+1, output)
@@ -362,9 +383,12 @@ def statement_list(fn, index, output):
         print("<Statement> -> { <Statement_List> }", file=output)
         index += 1
         while True:
-            if len(fn) > index and fn[index]['token'] != '}':
+            if index is not None and index is not None and len(fn) > index and fn[index]['token'] != '}':
                 index = statement(fn, index, output)
-            elif len(fn) < index:
+            elif index is None:
+                print("Expecting closing brace at line", past_line, file=output)
+                return None
+            elif len(fn) <= index:
                 past_line = fn[index]['line_num']
                 print("Expecting closing brace at line", past_line, file=output)
                 return None
@@ -387,7 +411,7 @@ def dec_list(fn, index, output):
         print("<Declaration> -> <Identifiers>", file=output)
         index += 1
         while True:
-            if len(fn) > index + 1 and fn[index]['lexeme'] == State.IDENTIFIER:
+            if index is not None and len(fn) > index + 1 and fn[index]['lexeme'] == State.IDENTIFIER:
                 printToken(fn, index, output)
                 index += 1
                 if fn[index]['token'] in [';']:
@@ -419,11 +443,11 @@ def parm_list(fn, index, output):
         return None
     if fn[index]['lexeme'] == State.IDENTIFIER:
         printToken(fn, index, output)
-        if len(fn) > index + 1 and fn[index + 1]['token'] == ':':
+        if index is not None and len(fn) > index + 1 and fn[index + 1]['token'] == ':':
             printToken(fn, index+1, output)
-            if len(fn) > index + 2 and fn[index+2]['token'] in ['int', 'boolean', 'real']:
+            if index is not None and len(fn) > index + 2 and fn[index+2]['token'] in ['int', 'boolean', 'real']:
                 printToken(fn, index+2, output)
-                if len(fn) > index + 3 and fn[index + 3]['token'] == ',':
+                if index is not None and len(fn) > index + 3 and fn[index + 3]['token'] == ',':
                     printToken(fn, index+3, output)
                     print("<Parameter> -> <Identifier>:<Qualifier>, ", file=output)
                     return parm_list(fn, index + 4, output)
@@ -431,15 +455,18 @@ def parm_list(fn, index, output):
                     print("<Parameter> -> <Identifier>:<Qualifier>", file=output)
                     return index + 3
             else:
-                past_line = fn[index]['line_num']
-                print("Expecting variable type at line", past_line, file=output)
+                if index is not None:
+                    past_line = fn[index]['line_num']
+                    print("Expecting variable type at line", past_line, file=output)
                 return None
         else:
-            past_line = fn[index]['line_num']
-            print("Expecting colon at line", past_line, file=output)
+            if index is not None:
+                past_line = fn[index]['line_num']
+                print("Expecting colon at line", past_line, file=output)
             return None
-    past_line = fn[index]['line_num']
-    print("Expecting identifier at line", past_line, file=output)
+    if index is not None:
+        past_line = fn[index]['line_num']
+        print("Expecting identifier at line", past_line, file=output)
     return None
 
 
@@ -450,9 +477,9 @@ def func_def(fn, index, output):
         return None
     if fn[index]['lexeme'] == State.IDENTIFIER:
         printToken(fn, index, output)
-        if len(fn) > index+1 and fn[index+1]['token'] == '[':
+        if index is not None and len(fn) > index+1 and fn[index+1]['token'] == '[':
             printToken(fn, index+1, output)
-            if len(fn) > index+2 and fn[index+1]['token'] != ']':
+            if index is not None and len(fn) > index+2 and fn[index+1]['token'] != ']':
                 printToken(fn, index+2, output)
                 print("<Opt Parameter List> -> <Parameter List>", file=output)
                 index = parm_list(fn, index+2, output)
@@ -462,7 +489,7 @@ def func_def(fn, index, output):
                 return None
             print("<Opt Parameter List> -> epsilon", file=output)
         index += 1
-        if len(fn) > index and fn[index]['token'] != '{':
+        if index is not None and len(fn) > index and fn[index]['token'] != '{':
             printToken(fn, index, output)
             print("<Opt Declaration List> -> <Declaration List>", file=output)
             index = dec_list(fn, index+1, output)
@@ -471,8 +498,9 @@ def func_def(fn, index, output):
         index = body_state(fn, index+1, output)
         return index
     else:
-        past_line = fn[index]['line_num']
-        print("Expecting identifier at line", past_line, file=output)
+        if index is not None:
+            past_line = fn[index]['line_num']
+            print("Expecting identifier at line", past_line, file=output)
         return None
 
 
@@ -493,8 +521,12 @@ def start(fn, index, output):
             index += 1
             while fn[index]['token'] in ['int', 'real', 'boolean']:
                 index = dec_list(fn, index, output)
+                if index is None:
+                    return None
                 index += 1
         index = statement_list(fn, index, output)
+        if index is None:
+            return None
         index -= 1
     elif fn[index]['token'] in ['int', 'real', 'boolean']:
         index = dec_list(fn, index, output)
@@ -503,24 +535,41 @@ def start(fn, index, output):
         index = body_state(fn, index+1, output)
     elif fn[index]['token'] in ['if', 'return', 'print', 'scan', 'while', 'get']:
         index = statement(fn, index, output)
+        if index is None:
+            return None
         index -= 1
     elif fn[index]['lexeme'] == State.IDENTIFIER:
         printToken(fn, index, output)
-        if len(fn) > index+1 and fn[index+1]['token'] == '=':
+        if index is not None and index is not None and len(fn) > index+1 and fn[index+1]['token'] == '=':
             print("<Assign> ->  <Identifier> = <Expression>", file=output)
             printToken(fn, index+1, output)
             index = express(fn, index + 2, output)
         else:
             index = express(fn, index + 1, output)
-    return index + 1
+    else:
+        printToken(fn, index, output)
+        past_line = fn[index]['line_num']
+        print("Expected identifier at line", past_line, file=output)
+        return None
+    if index is None:
+        if past_line == 0:
+            print("Expected identifier at line", fn[len(fn) - 1]['line_num'], file=output)
+        else:
+            print("Expected identifier at line", past_line, file=output)
+        return None
+    else:
+        return index + 1
 
 
 def syntaxAnalyzer(fn, output):
+    global past_line
     index = 0
     new_arr = []
     result = []
     while index < len(fn):
         index = start(fn, index, output)
+        if index is None:
+            break
 
 
 filename = input('Enter a input filename: ')
