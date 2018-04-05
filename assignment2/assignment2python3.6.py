@@ -151,6 +151,9 @@ def body_state(fn, index, output):
                 print("Expecting closing brace at line", past_line, file=output)
                 return None
             else:
+                if index is None:
+                    print("Expecting closing brace at line", past_line, file=output)
+                    return None
                 printToken(fn, index, output)
                 return index + 1
     else:
@@ -184,6 +187,8 @@ def factor(fn, index, output):
             print("( <Identifiers> )", file=output)
             return factor(fn, index+1, output)
         print("", file=output)
+        if index is None:
+            return None
         return index + 1
     elif index is not None and len(fn) > index and fn[index]['token'] in ['+', '-'] and len(fn) > index + 1:
         printToken(fn, index, output)
@@ -393,6 +398,9 @@ def statement_list(fn, index, output):
                 print("Expecting closing brace at line", past_line, file=output)
                 return None
             else:
+                if index is None:
+                    print("Expecting closing brace at line", past_line, file=output)
+                    return None
                 printToken(fn, index, output)
                 return index + 1
     else:
@@ -452,6 +460,9 @@ def parm_list(fn, index, output):
                     print("<Parameter> -> <Identifier>:<Qualifier>, ", file=output)
                     return parm_list(fn, index + 4, output)
                 else:
+                    if index is None:
+                        print("Expecting identifier, colon, or qualifier at line", past_line, file=output)
+                        return None
                     print("<Parameter> -> <Identifier>:<Qualifier>", file=output)
                     return index + 3
             else:
@@ -545,6 +556,9 @@ def start(fn, index, output):
             printToken(fn, index+1, output)
             index = express(fn, index + 2, output)
         else:
+            if index is None:
+                print("Expecting expression at line", past_line, file=output)
+                return None
             index = express(fn, index + 1, output)
     else:
         printToken(fn, index, output)
@@ -564,8 +578,6 @@ def start(fn, index, output):
 def syntaxAnalyzer(fn, output):
     global past_line
     index = 0
-    new_arr = []
-    result = []
     while index < len(fn):
         index = start(fn, index, output)
         if index is None:
