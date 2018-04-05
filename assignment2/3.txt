@@ -1,0 +1,227 @@
+Token:  State.KEYWORD 	Lexeme: function
+<Function Definition> -> <Function>
+<Function> -> function <Identifier> [Opt Parameter List] <Opt Declaration List> <Body>
+Token:  State.IDENTIFIER 	Lexeme: areaofcircle$
+Token:  State.SEPARATOR 	Lexeme: [
+Token:  State.IDENTIFIER 	Lexeme: radius
+<Opt Parameter List> -> <Parameter List>
+Token:  State.IDENTIFIER 	Lexeme: radius
+Token:  State.SEPARATOR 	Lexeme: :
+Token:  State.KEYWORD 	Lexeme: real
+<Parameter> -> <Identifier>:<Qualifier>
+<Opt Parameter List> -> epsilon
+<Opt Declaration List> -> epsilon,
+Token:  State.SEPARATOR 	Lexeme: {
+<Body> -> { <Statement_List> }
+Token:  State.KEYWORD 	Lexeme: return
+<Return> -> return <Expression>;
+<Expression> -> <Term><Expression Prime>;
+Token:  State.SEPARATOR 	Lexeme: (
+<Term> -> <Factor><Term Prime>
+Token:  State.REAL 	Lexeme: 3.14
+<Factor> -> ( <Expression> )
+<Expression> -> <Term><Expression Prime>;
+Token:  State.REAL 	Lexeme: 3.14
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>
+<Term Prime> -> * <Term>
+Token:  State.SEPARATOR 	Lexeme: (
+<Term> -> <Factor><Term Prime>
+Token:  State.IDENTIFIER 	Lexeme: radius
+<Factor> -> ( <Expression> )
+<Expression> -> <Term><Expression Prime>;
+Token:  State.IDENTIFIER 	Lexeme: radius
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>
+<Term Prime> -> * <Term>
+Token:  State.IDENTIFIER 	Lexeme: radius
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: )
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: )
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: ;
+Token:  State.SEPARATOR 	Lexeme: }
+Token:  State.KEYWORD 	Lexeme: function
+<Function Definition> -> <Function>
+<Function> -> function <Identifier> [Opt Parameter List] <Opt Declaration List> <Body>
+Token:  State.IDENTIFIER 	Lexeme: areawithdiameter
+Token:  State.SEPARATOR 	Lexeme: [
+Token:  State.IDENTIFIER 	Lexeme: diameter
+<Opt Parameter List> -> <Parameter List>
+Token:  State.IDENTIFIER 	Lexeme: diameter
+Token:  State.SEPARATOR 	Lexeme: :
+Token:  State.KEYWORD 	Lexeme: real
+<Parameter> -> <Identifier>:<Qualifier>
+<Opt Parameter List> -> epsilon
+<Opt Declaration List> -> epsilon,
+Token:  State.SEPARATOR 	Lexeme: {
+<Body> -> { <Statement_List> }
+Token:  State.KEYWORD 	Lexeme: return
+<Return> -> return <Expression>;
+<Expression> -> <Term><Expression Prime>;
+Token:  State.SEPARATOR 	Lexeme: (
+<Term> -> <Factor><Term Prime>
+Token:  State.IDENTIFIER 	Lexeme: areaofcircle
+<Factor> -> ( <Expression> )
+<Expression> -> <Term><Expression Prime>;
+Token:  State.IDENTIFIER 	Lexeme: areaofcircle
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>( <Identifiers> )
+Token:  State.IDENTIFIER 	Lexeme: diameter
+<Factor> -> ( <Expression> )
+<Expression> -> <Term><Expression Prime>;
+Token:  State.IDENTIFIER 	Lexeme: diameter
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>
+<Term Prime> -> / <Term>
+Token:  State.INTEGER 	Lexeme: 2
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: )
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: )
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: ;
+Token:  State.SEPARATOR 	Lexeme: }
+Token:  State.SEPARATOR 	Lexeme: %%
+Token:  State.KEYWORD 	Lexeme: int
+<Declaration List> -> <Declaration>;
+<Declaration> -> <Identifiers>
+Token:  State.IDENTIFIER 	Lexeme: choose$
+<Identifiers> -> <Identifier>
+Token:  State.SEPARATOR 	Lexeme: ;
+Token:  State.KEYWORD 	Lexeme: real
+<Declaration List> -> <Declaration>;
+<Declaration> -> <Identifiers>
+Token:  State.IDENTIFIER 	Lexeme: radius
+Token:  State.SEPARATOR 	Lexeme: ,
+<Identifiers> -> <Identifier>, <Identifiers>
+Token:  State.IDENTIFIER 	Lexeme: diameter
+Token:  State.SEPARATOR 	Lexeme: ,
+<Identifiers> -> <Identifier>, <Identifiers>
+Token:  State.IDENTIFIER 	Lexeme: area$
+<Identifiers> -> <Identifier>
+Token:  State.SEPARATOR 	Lexeme: ;
+<Statement_List> -> 
+Token:  State.KEYWORD 	Lexeme: get
+<Scan> -> get (<Identifiers>);
+Token:  State.SEPARATOR 	Lexeme: (
+Token:  State.IDENTIFIER 	Lexeme: chooseNum$
+Token:  State.SEPARATOR 	Lexeme: )
+<Identifiers> -> <Identifier>
+Token:  State.SEPARATOR 	Lexeme: ;
+Token:  State.KEYWORD 	Lexeme: get
+<Scan> -> get (<Identifiers>);
+Token:  State.SEPARATOR 	Lexeme: (
+Token:  State.IDENTIFIER 	Lexeme: radius
+Token:  State.SEPARATOR 	Lexeme: ,
+<Identifiers> -> <Identifier>, <Identifiers>
+Token:  State.IDENTIFIER 	Lexeme: diameter
+Token:  State.SEPARATOR 	Lexeme: ,
+<Identifiers> -> <Identifier>, <Identifiers>
+Token:  State.IDENTIFIER 	Lexeme: area$
+Token:  State.SEPARATOR 	Lexeme: )
+<Identifiers> -> <Identifier>
+Token:  State.SEPARATOR 	Lexeme: ;
+Token:  State.KEYWORD 	Lexeme: if
+<If> -> if (<Condition>) <Statement> endif
+Token:  State.SEPARATOR 	Lexeme: (
+<Condition> -> <Expression> <Relop> <Expression>
+<Expression> -> <Term><Expression Prime>;
+Token:  State.IDENTIFIER 	Lexeme: choose$
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.OPERATOR 	Lexeme: ==
+<Relop> -> ==
+<Expression> -> <Term><Expression Prime>;
+Token:  State.INTEGER 	Lexeme: 1
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: )
+Token:  State.SEPARATOR 	Lexeme: {
+<Statement> -> { <Statement_List> }
+Token:  State.KEYWORD 	Lexeme: put
+<Print> -> put (<Expression>);
+Token:  State.SEPARATOR 	Lexeme: (
+<Expression> -> <Term><Expression Prime>;
+Token:  State.IDENTIFIER 	Lexeme: areaofcircle$
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>( <Identifiers> )
+Token:  State.IDENTIFIER 	Lexeme: radius
+<Factor> -> ( <Expression> )
+<Expression> -> <Term><Expression Prime>;
+Token:  State.IDENTIFIER 	Lexeme: radius
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: )
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: )
+Token:  State.SEPARATOR 	Lexeme: ;
+Token:  State.SEPARATOR 	Lexeme: }
+<If> -> if (<Condition>) <Statement> else <Statement> endif
+Token:  State.KEYWORD 	Lexeme: else
+Token:  State.SEPARATOR 	Lexeme: {
+<Statement> -> { <Statement_List> }
+Token:  State.KEYWORD 	Lexeme: if
+<If> -> if (<Condition>) <Statement> endif
+Token:  State.SEPARATOR 	Lexeme: (
+<Condition> -> <Expression> <Relop> <Expression>
+<Expression> -> <Term><Expression Prime>;
+Token:  State.IDENTIFIER 	Lexeme: choose$
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.OPERATOR 	Lexeme: ==
+<Relop> -> ==
+<Expression> -> <Term><Expression Prime>;
+Token:  State.INTEGER 	Lexeme: 2
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: )
+Token:  State.SEPARATOR 	Lexeme: {
+<Statement> -> { <Statement_List> }
+Token:  State.KEYWORD 	Lexeme: put
+<Print> -> put (<Expression>);
+Token:  State.SEPARATOR 	Lexeme: (
+<Expression> -> <Term><Expression Prime>;
+Token:  State.IDENTIFIER 	Lexeme: areawithdiameter
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>( <Identifiers> )
+Token:  State.IDENTIFIER 	Lexeme: diameter
+<Factor> -> ( <Expression> )
+<Expression> -> <Term><Expression Prime>;
+Token:  State.IDENTIFIER 	Lexeme: diameter
+<Term> -> <Factor><Term Prime>
+<Factor> -> <Identifier>
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: )
+<Term Prime> -> epsilon
+<Expression Prime> -> epsilon
+Token:  State.SEPARATOR 	Lexeme: )
+Token:  State.SEPARATOR 	Lexeme: ;
+Token:  State.SEPARATOR 	Lexeme: }
+<If> -> if (<Condition>) <Statement> endif
+Token:  State.KEYWORD 	Lexeme: endif
+Token:  State.SEPARATOR 	Lexeme: }
+Token:  State.KEYWORD 	Lexeme: endif

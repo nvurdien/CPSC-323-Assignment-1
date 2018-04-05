@@ -19,6 +19,7 @@ if(choose$ == 1)
 	put(areaofcircle$(radius));
 }
 else
+{
 	if(choose$ == 2)
 	{
 		put(areawithdiameter(diameter));
