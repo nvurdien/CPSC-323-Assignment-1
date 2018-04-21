@@ -74,7 +74,7 @@ def checkToken(token):
 comment = False
 
 
-def Lexer(expression):
+def Lexer(expression, line_num):
     global col, comment
     tokens = []
     col = State.REJECT
@@ -95,15 +95,18 @@ def Lexer(expression):
                         comment = True
                 elif not comment:
                     if currentToken in keyword:
-                        tokens.append({'token': currentToken, 'lexeme': State.KEYWORD})
-                    elif prevState == State.IDENTIFIER and currentToken.find('$') > -1 and currentToken[len(currentToken)-1] != '$':
-                        tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN})
+                        tokens.append({'token': currentToken, 'lexeme': State.KEYWORD, 'line_num': line_num})
+                    elif prevState == State.IDENTIFIER and (currentToken[len(currentToken) - 1].isdigit()):
+                        tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN, 'line_num': line_num})
                     elif currentToken == '%%':
-                        tokens.append({'token': currentToken, 'lexeme': State.SEPARATOR})
-                    elif prevState == State.REAL and (currentToken.index(".") == 0 or currentToken.index(".") == len(currentToken)-1):
-                        tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN})
+                        tokens.append({'token': currentToken, 'lexeme': State.SEPARATOR, 'line_num': line_num})
+                    elif prevState == State.REAL and (
+                            currentToken.index(".") == 0 or currentToken.index(".") == len(currentToken) - 1):
+                        tokens.append({'token': currentToken, 'lexeme': State.UNKNOWN, 'line_num': line_num})
+                    elif currentToken is 'true' or currentToken is 'false':
+                        tokens.append({'token': currentToken, 'lexeme': State.BOOLEAN, 'line_num': line_num})
                     else:
-                        tokens.append({'token': currentToken, 'lexeme': prevState})
+                        tokens.append({'token': currentToken, 'lexeme': prevState, 'line_num': line_num})
             currentToken = token
             currentState = checkToken(token)
         else:
@@ -111,7 +114,7 @@ def Lexer(expression):
             currentToken += token
         prevState = currentState
     if currentState != State.SPACE and currentToken and currentState != State.REJECT:
-        tokens.append({'token': currentToken, 'lexeme': prevState})
+        tokens.append({'token': currentToken, 'lexeme': prevState, 'line_num': line_num})
     return tokens
 
 

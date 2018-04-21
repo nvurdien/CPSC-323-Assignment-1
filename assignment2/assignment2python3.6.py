@@ -451,6 +451,8 @@ def parm_list(fn, index, output):
         return None
     if fn[index]['lexeme'] == State.IDENTIFIER:
         printToken(fn, index, output)
+        if index is not None and len(fn) > index + 1 and fn[index + 1]['token'] == ',':
+            return parm_list(fn, index+2, output)
         if index is not None and len(fn) > index + 1 and fn[index + 1]['token'] == ':':
             printToken(fn, index+1, output)
             if index is not None and len(fn) > index + 2 and fn[index+2]['token'] in ['int', 'boolean', 'real']:
@@ -503,7 +505,10 @@ def func_def(fn, index, output):
         if index is not None and len(fn) > index and fn[index]['token'] != '{':
             printToken(fn, index, output)
             print("<Opt Declaration List> -> <Declaration List>", file=output)
-            index = dec_list(fn, index+1, output)
+            while index is not None and fn[index]['token'] != '{':
+                index = dec_list(fn, index, output) + 1
+            if index is None:
+                print("unexpected expression at line ", past_line, file=output)
         else:
             print("<Opt Declaration List> -> epsilon,", file=output)
         index = body_state(fn, index+1, output)
@@ -594,7 +599,6 @@ with open(filename) as inputfile:
         results += Lexer(line, line_n)
         line_n += 1
 
-print(results)
 
 filename = input('Enter a output filename: ')
 

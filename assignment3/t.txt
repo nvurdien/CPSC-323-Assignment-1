@@ -1,0 +1,18 @@
+1 	 PUSHM 	 2000
+2 	 PUSHM 	 2001
+3 	 PUSHM 	 2002
+4 	 STDIN 	 
+5 	 STDIN 	 
+6 	 STDIN 	 
+7 	 LABEL 	 
+8 	 PUSHM 	 2000
+9 	 PUSHM 	 2001
+10 	 LES 	 
+11 	 JUMPZ 	 19
+12 	 PUSHM 	 2000
+13 	 STDOUT 	 
+14 	 PUSHM 	 2000
+15 	 PUSHM 	 2000
+16 	 ADD 	 
+17 	 POPM 	 2000
+18 	 JUMP 	 7

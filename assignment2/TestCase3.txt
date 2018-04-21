@@ -1,5 +1,7 @@
 !Find area of a circle!
-function areaofcircle$ [radius:real]
+function areaofcircle$ [radius, something:real, ban:int]
+real how;
+boolean what;
 {
 	return(3.14*(radius*radius));
 }

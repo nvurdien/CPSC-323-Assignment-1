@@ -1,0 +1,23 @@
+!Find area of a circle!
+
+%%
+
+int choose$;	! Choose to use radius or diameter !
+real radius, diameter, area$;
+
+get(chooseNum$);
+get(radius, diameter, area$);
+
+if(choose$ == 1)
+{
+	put(radius);
+}
+else
+{
+	if(choose$ == 2)
+	{
+		put(radius + diameter);
+	}
+	endif
+}
+endif
