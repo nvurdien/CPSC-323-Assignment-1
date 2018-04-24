@@ -1,0 +1,22 @@
+1 	 STDIN 	 
+2 	 POPM 	 2000
+3 	 STDIN 	 
+4 	 POPM 	 2001
+5 	 STDIN 	 
+6 	 POPM 	 2002
+7 	 STDIN 	 
+8 	 POPM 	 2003
+9 	 PUSHM 	 2000
+10 	 PUSHI 	 1
+11 	 EQU 	 
+12 	 JUMPZ 	 15
+13 	 PUSHM 	 2001
+14 	 STDOUT 	 
+15 	 PUSHM 	 2000
+16 	 PUSHI 	 2
+17 	 EQU 	 
+18 	 JUMPZ 	 23
+19 	 PUSHM 	 2001
+20 	 PUSHM 	 2002
+21 	 ADD 	 
+22 	 STDOUT 	 

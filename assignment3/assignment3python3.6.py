@@ -179,7 +179,6 @@ def S(fn, index, output):
         while fn[index]['lexeme'] == State.IDENTIFIER:
             if fn[index]['token'] not in symbolTable:
                 symbolTable[fn[index]['token']] = [fn[index]['token'], 2000 + len(symbolTable), State.IDENTIFIER, None]
-                gen_instr("PUSHM", symbolTable[fn[index]['token']][1])
             else:
                 print("identifier reinitialization at line ", fn[index]['line_num'], file=output)
                 return None
@@ -220,6 +219,7 @@ def S(fn, index, output):
             index += 1
             while index < len(fn) and fn[index]['lexeme'] == State.IDENTIFIER:
                 gen_instr("STDIN", "")
+                gen_instr("POPM", symbolTable[fn[index]['token']][1])
                 index += 1
                 if fn[index]['token'] == ',':
                     index += 1
@@ -310,18 +310,23 @@ def whileStatements(fn, index, output):
 
 def F(fn, index, save, output):
     global symbolTable
-    if fn[index]['lexeme'] in [State.IDENTIFIER, State.INTEGER]:
-        if save in symbolTable and symbolTable[save][2] == State.IDENTIFIER:
-            gen_instr("PUSHM", symbolTable[save][1])
-        else:
-            gen_instr("PUSHI", fn[index]['token'])
+    if fn[index]['lexeme'] == State.IDENTIFIER:
+        gen_instr("PUSHM", symbolTable[fn[index]['token']][1])
+        return index + 1
+    elif fn[index]['lexeme'] == State.INTEGER:
+        gen_instr("PUSHI", fn[index]['token'])
         return index + 1
     else:
         print("identifier expected at line ", fn[index]['line_num'], file=output)
 
 
 def T_prime(fn, index, save, output):
-    if fn[index]['token'] == "*":
+    if fn[index]['token'] == '/':
+        index += 1
+        index = F(fn, index, save, output)
+        gen_instr("DIV", "")
+        return T_prime(fn, index, save, output)
+    elif fn[index]['token'] == "*":
         index += 1
         index = F(fn, index, save, output)
         gen_instr("MUL", "")
@@ -335,7 +340,12 @@ def T(fn, index, save, output):
 
 
 def E_prime(fn, index, save, output):
-    if fn[index]['token'] == '+':
+    if fn[index]['token'] == '-':
+        index += 1
+        index = T(fn, index, save, output)
+        gen_instr("SUB", "")
+        return E_prime(fn, index, save, output)
+    elif fn[index]['token'] == '+':
         index += 1
         index = T(fn, index, save, output)
         gen_instr("ADD", "")
@@ -447,24 +457,11 @@ with open(filename) as inputfile:
         results += Lexer(line, line_n)
         line_n += 1
 
-print(results)
-
 filename = input('Enter a output filename: ')
-
-with open(filename, "w+") as outputfile:
-    with open(filename, "w+") as syntaxOutput:
-        syntaxAnalyzer(results, syntaxOutput)
+try:
+    with open(filename, "w+") as outputfile:
+        syntaxAnalyzer(results, outputfile)
         assemblyCode(outputfile)
-
-print(symbolTable)
-print(assemblyStack)
-
-# include output file
-# filename = input('Enter a output filename: ')
-# with open(filename, "w+") as outputfile:
-#     print("Token\t\t=\tLexeme", file=outputfile)
-#     for r in results:
-#         if r['lexeme'].fullname == 'REAL':
-#             print(r['lexeme'].fullname, "\t\t=\t", r['token'], file=outputfile)
-#         else:
-#             print(r['lexeme'].fullname, "\t=\t", r['token'], file=outputfile)
+except KeyError or TypeError:
+    print(symbolTable)
+    print(assemblyStack)

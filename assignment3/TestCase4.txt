@@ -1,5 +1,5 @@
 %%
-integer i, max, sum;
+int i, max, sum;
 
 sum=0;
 i=1;

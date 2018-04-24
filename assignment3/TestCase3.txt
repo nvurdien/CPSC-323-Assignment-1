@@ -3,9 +3,9 @@
 %%
 
 int choose$;	! Choose to use radius or diameter !
-real radius, diameter, area$;
+int radius, diameter, area$;
 
-get(chooseNum$);
+get(choose$);
 get(radius, diameter, area$);
 
 if(choose$ == 1)
