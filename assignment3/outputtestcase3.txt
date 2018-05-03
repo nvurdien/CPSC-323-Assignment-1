@@ -20,3 +20,10 @@
 20 	 PUSHM 	 2002
 21 	 ADD 	 
 22 	 STDOUT 	 
+
+Symbol Table
+Identifier	MemoryLocation	Type
+choose$ 		 2000 		 integer
+radius 		 2001 		 integer
+diameter 		 2002 		 integer
+area$ 		 2003 		 integer

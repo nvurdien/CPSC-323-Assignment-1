@@ -178,7 +178,20 @@ def S(fn, index, output):
         index += 1
         while fn[index]['lexeme'] == State.IDENTIFIER:
             if fn[index]['token'] not in symbolTable:
-                symbolTable[fn[index]['token']] = [fn[index]['token'], 2000 + len(symbolTable), State.IDENTIFIER, None]
+                symbolTable[fn[index]['token']] = [fn[index]['token'], 2000 + len(symbolTable), 'integer', None]
+            else:
+                print("identifier reinitialization at line ", fn[index]['line_num'], file=output)
+                return None
+            index += 1
+            if fn[index]['token'] == ',':
+                index += 1
+            elif fn[index]['token'] == ';':
+                return index + 1
+    elif fn[index]['token'] == 'boolean':
+        index += 1
+        while fn[index]['lexeme'] == State.IDENTIFIER:
+            if fn[index]['token'] not in symbolTable:
+                symbolTable[fn[index]['token']] = [fn[index]['token'], 2000 + len(symbolTable), 'boolean', None]
             else:
                 print("identifier reinitialization at line ", fn[index]['line_num'], file=output)
                 return None
@@ -282,6 +295,18 @@ def C(fn, index, output):
             jumpStack.append(len(assemblyStack))
             gen_instr("JUMPZ", "")
         return index
+    elif fn[index]['token'] == ')' and fn[index-1]['token'] in ['true', 'false']:
+        if fn[index-1]['token'] == 'true':
+            gen_instr("PUSHI", 1)
+            gen_instr("EQU", "")
+            jumpStack.append(len(assemblyStack))
+            gen_instr("JUMPZ", "")
+        else:
+            gen_instr("PUSHI", 1)
+            gen_instr("EQU", "")
+            jumpStack.append(len(assemblyStack))
+            gen_instr("JUMPZ", "")
+        return index
     else:
         print("boolean operator expected at line ", fn[index]['line_num'], file=output)
 
@@ -315,6 +340,12 @@ def F(fn, index, save, output):
         return index + 1
     elif fn[index]['lexeme'] == State.INTEGER:
         gen_instr("PUSHI", fn[index]['token'])
+        return index + 1
+    elif fn[index]['token'] == 'true':
+        gen_instr("PUSHI", 1)
+        return index + 1
+    elif fn[index]['token'] == 'false':
+        gen_instr("PUSHI", 0)
         return index + 1
     else:
         print("identifier expected at line ", fn[index]['line_num'], file=output)
@@ -445,6 +476,11 @@ def gen_instr(op, oprnd):
 def assemblyCode(output):
     for code in assemblyStack:
         print(code["address"] + 1, "\t", code["operation"], "\t", code["operand"], file=output)
+    print("", file=output)
+    print("Symbol Table", file=output)
+    print("Identifier\tMemoryLocation\tType", file=output)
+    for sym in symbolTable:
+        print(symbolTable[sym][0], '\t\t', symbolTable[sym][1], '\t\t', symbolTable[sym][2], file=output)
 
 
 filename = input('Enter a input filename: ')

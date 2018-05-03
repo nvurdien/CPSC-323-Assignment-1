@@ -16,3 +16,9 @@
 16 	 ADD 	 
 17 	 POPM 	 2000
 18 	 JUMP 	 7
+
+Symbol Table
+Identifier	MemoryLocation	Type
+low 		 2000 		 integer
+high 		 2001 		 integer
+step$ 		 2002 		 integer

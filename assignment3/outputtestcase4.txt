@@ -22,3 +22,9 @@
 22 	 PUSHM 	 2001
 23 	 ADD 	 
 24 	 STDOUT 	 
+
+Symbol Table
+Identifier	MemoryLocation	Type
+i 		 2000 		 integer
+max 		 2001 		 integer
+sum 		 2002 		 integer

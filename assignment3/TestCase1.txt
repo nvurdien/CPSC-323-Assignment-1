@@ -2,6 +2,9 @@
 int num, nu2m, large$;
 num = 0;
 nu2m = 15;
+boolean hey;
+hey = true;
+hey = false;
 if(num > nu2m)
 {
 	large$ = num;
